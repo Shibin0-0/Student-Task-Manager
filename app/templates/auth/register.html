@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Register — Student Task Manager{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-sm-10 col-md-8 col-lg-5">
+
+        <div class="card mt-4">
+            <div class="card-header bg-primary text-white py-3 text-center">
+                <h2 class="h5 mb-0">
+                    <i class="bi bi-person-plus-fill me-2"></i>Create an Account
+                </h2>
+            </div>
+            <div class="card-body p-4">
+
+                <form
+                    method="POST"
+                    action="{{ url_for('auth.register') }}"
+                    novalidate
+                    id="register-form"
+                >
+                    <!-- Name -->
+                    <div class="mb-3">
+                        <label for="name" class="form-label fw-semibold">
+                            Full Name <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-person"></i>
+                            </span>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="name"
+                                name="name"
+                                value="{{ name | default('') }}"
+                                placeholder="e.g. Jane Smith"
+                                maxlength="100"
+                                required
+                                autofocus
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-3">
+                        <label for="email" class="form-label fw-semibold">
+                            Email Address <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-envelope"></i>
+                            </span>
+                            <input
+                                type="email"
+                                class="form-control"
+                                id="email"
+                                name="email"
+                                value="{{ email | default('') }}"
+                                placeholder="you@example.com"
+                                maxlength="255"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="mb-3">
+                        <label for="password" class="form-label fw-semibold">
+                            Password <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-lock"></i>
+                            </span>
+                            <input
+                                type="password"
+                                class="form-control"
+                                id="password"
+                                name="password"
+                                placeholder="At least 8 characters"
+                                minlength="8"
+                                required
+                            >
+                        </div>
+                        <div class="form-text">Minimum 8 characters.</div>
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div class="mb-4">
+                        <label for="confirm_password" class="form-label fw-semibold">
+                            Confirm Password <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-lock-fill"></i>
+                            </span>
+                            <input
+                                type="password"
+                                class="form-control"
+                                id="confirm_password"
+                                name="confirm_password"
+                                placeholder="Repeat your password"
+                                minlength="8"
+                                required
+                            >
+                        </div>
+                        <!-- Client-side mismatch hint (shown by JS) -->
+                        <div class="form-text text-danger d-none" id="pw-mismatch-hint">
+                            Passwords do not match.
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg" id="register-btn">
+                            <i class="bi bi-person-check me-2"></i>Register
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+            <div class="card-footer text-center py-3 bg-light">
+                <small>
+                    Already have an account?
+                    <a href="{{ url_for('auth.login') }}" class="fw-semibold text-primary">
+                        Log in here
+                    </a>
+                </small>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+
+{% block extra_scripts %}
+<script>
+    /**
+     * Client-side confirm-password check.
+     *
+     * This is only a UX helper — the server always validates too.
+     * The button is disabled while passwords do not match to prevent
+     * accidental submissions.
+     */
+    const passwordInput   = document.getElementById('password');
+    const confirmInput    = document.getElementById('confirm_password');
+    const mismatchHint    = document.getElementById('pw-mismatch-hint');
+    const registerBtn     = document.getElementById('register-btn');
+
+    function checkPasswords() {
+        const pw  = passwordInput.value;
+        const cpw = confirmInput.value;
+
+        if (cpw.length === 0) {
+            // Don't show the hint before the user has typed anything.
+            mismatchHint.classList.add('d-none');
+            registerBtn.disabled = false;
+            return;
+        }
+
+        if (pw !== cpw) {
+            mismatchHint.classList.remove('d-none');
+            registerBtn.disabled = true;
+        } else {
+            mismatchHint.classList.add('d-none');
+            registerBtn.disabled = false;
+        }
+    }
+
+    passwordInput.addEventListener('input', checkPasswords);
+    confirmInput.addEventListener('input', checkPasswords);
+</script>
+{% endblock %}

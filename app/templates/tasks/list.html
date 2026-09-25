@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}My Tasks — Student Task Manager{% endblock %}
+
+{% block content %}
+
+<!-- Page heading -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="h3 fw-bold mb-1" style="color: #1e3a5f;">
+            <i class="bi bi-list-task me-2 text-primary"></i>My Tasks
+        </h1>
+        <p class="text-muted mb-0">
+            {{ tasks | length }} task{{ 's' if tasks | length != 1 else '' }} total
+        </p>
+    </div>
+    <a href="{{ url_for('tasks.create_task_view') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-2"></i>New Task
+    </a>
+</div>
+
+{% if tasks %}
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="tasks-table">
+                <thead style="background: #f8fafc;">
+                    <tr>
+                        <th class="px-4 py-3 text-muted fw-semibold small text-uppercase" style="letter-spacing:.05em;">Title</th>
+                        <th class="py-3 text-muted fw-semibold small text-uppercase" style="letter-spacing:.05em;">Description</th>
+                        <th class="py-3 text-muted fw-semibold small text-uppercase" style="letter-spacing:.05em;">Status</th>
+                        <th class="py-3 text-muted fw-semibold small text-uppercase" style="letter-spacing:.05em;">Due Date</th>
+                        <th class="py-3 text-muted fw-semibold small text-uppercase" style="letter-spacing:.05em;">Created</th>
+                        <th class="py-3 pe-4 text-muted fw-semibold small text-uppercase text-end" style="letter-spacing:.05em;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in tasks %}
+                    <tr id="task-row-{{ task.id }}">
+
+                        <!-- Title -->
+                        <td class="px-4 py-3">
+                            <span class="fw-semibold {% if task.status == 'completed' %}text-decoration-line-through text-muted{% endif %}">
+                                {{ task.title }}
+                            </span>
+                        </td>
+
+                        <!-- Description -->
+                        <td class="py-3" style="max-width: 220px;">
+                            <span class="text-muted small text-truncate d-block" style="max-width:200px;">
+                                {{ task.description if task.description else '—' }}
+                            </span>
+                        </td>
+
+                        <!-- Status badge -->
+                        <td class="py-3">
+                            {% if task.status == 'completed' %}
+                                <span class="badge rounded-pill px-3 py-2" style="background:#dcfce7; color:#16a34a; font-size:.8rem;">
+                                    <i class="bi bi-check-circle-fill me-1"></i>Completed
+                                </span>
+                            {% else %}
+                                <span class="badge rounded-pill px-3 py-2" style="background:#fff7ed; color:#ea580c; font-size:.8rem;">
+                                    <i class="bi bi-hourglass-split me-1"></i>Pending
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Due date -->
+                        <td class="py-3">
+                            {% if task.due_date %}
+                                <span class="small text-muted">
+                                    <i class="bi bi-calendar3 me-1"></i>
+                                    {{ task.due_date.strftime('%d %b %Y') }}
+                                </span>
+                            {% else %}
+                                <span class="small text-muted">—</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Created date -->
+                        <td class="py-3">
+                            <span class="small text-muted">
+                                {{ task.created_at.strftime('%d %b %Y') }}
+                            </span>
+                        </td>
+
+                        <!-- Actions -->
+                        <td class="py-3 pe-4 text-end">
+                            <div class="d-flex justify-content-end gap-2">
+
+                                <!-- Toggle status -->
+                                <form
+                                    method="POST"
+                                    action="{{ url_for('tasks.toggle_task_view', task_id=task.id) }}"
+                                    class="d-inline"
+                                >
+                                    {% if task.status == 'completed' %}
+                                        <button
+                                            type="submit"
+                                            class="btn btn-sm btn-outline-secondary"
+                                            title="Mark as pending"
+                                        >
+                                            <i class="bi bi-arrow-counterclockwise"></i>
+                                        </button>
+                                    {% else %}
+                                        <button
+                                            type="submit"
+                                            class="btn btn-sm btn-outline-success"
+                                            title="Mark as completed"
+                                        >
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                    {% endif %}
+                                </form>
+
+                                <!-- Edit -->
+                                <a
+                                    href="{{ url_for('tasks.edit_task_view', task_id=task.id) }}"
+                                    class="btn btn-sm btn-outline-primary"
+                                    title="Edit task"
+                                >
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+
+                                <!-- Delete -->
+                                <form
+                                    method="POST"
+                                    action="{{ url_for('tasks.delete_task_view', task_id=task.id) }}"
+                                    class="d-inline delete-form"
+                                    id="delete-form-{{ task.id }}"
+                                >
+                                    <button
+                                        type="submit"
+                                        class="btn btn-sm btn-outline-danger"
+                                        title="Delete task"
+                                        data-task-title="{{ task.title }}"
+                                    >
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+
+                            </div>
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- Empty state -->
+<div class="card border-0 shadow-sm">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-inbox" style="font-size: 3.5rem; color: #cbd5e1;"></i>
+        <h2 class="h5 fw-semibold mt-3 mb-2 text-muted">No tasks yet</h2>
+        <p class="text-muted mb-4">Create your first task to get started.</p>
+        <a href="{{ url_for('tasks.create_task_view') }}" class="btn btn-primary px-4">
+            <i class="bi bi-plus-lg me-2"></i>Add Your First Task
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<!-- Back to dashboard -->
+<div class="mt-3">
+    <a href="{{ url_for('tasks.dashboard') }}" class="btn btn-link text-muted ps-0">
+        <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+    </a>
+</div>
+
+{% endblock %}
